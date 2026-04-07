@@ -6,13 +6,65 @@
 <title>申込フォーム</title>
 
 <style>
-body { font-family:sans-serif; background:#f5f5f5; padding:20px;}
-.container { max-width:500px; margin:auto;}
-.item { background:#fff; padding:12px; margin-bottom:10px; border-radius:10px;}
-input, select, textarea { width:100%; padding:8px; margin-top:5px;}
-button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:10px; background:#4CAF50; color:white;}
-#result { white-space: pre-wrap; background:#fff; padding:10px; margin-top:10px; border-radius:10px;}
-.hidden { display:none; }
+body {
+  font-family:sans-serif;
+  background:#f5f5f5;
+  padding:20px;
+}
+
+.container {
+  max-width:500px;
+  margin:auto;
+}
+
+.item {
+  background:#fff;
+  padding:12px;
+  margin-bottom:12px;
+  border-radius:10px;
+}
+
+.label-title {
+  background:#222;
+  color:#fff;
+  padding:6px 10px;
+  border-radius:6px;
+  margin-bottom:6px;
+  font-size:14px;
+}
+
+input, select, textarea {
+  width:100%;
+  padding:8px;
+  margin-top:5px;
+}
+
+label {
+  display:block;
+  margin-bottom:5px;
+}
+
+button {
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:10px;
+  background:#4CAF50;
+  color:white;
+}
+
+#result {
+  white-space: pre-wrap;
+  background:#fff;
+  padding:10px;
+  margin-top:10px;
+  border-radius:10px;
+}
+
+.hidden {
+  display:none;
+}
 </style>
 </head>
 
@@ -21,17 +73,23 @@ button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:1
 
 <h2>申込フォーム</h2>
 
-<div class="item">お名前
+<div class="item">
+<div class="label-title">お名前</div>
 <input id="name" placeholder="ひらがなで入力してください">
 </div>
 
-<div class="item">お電話番号
+<div class="item">
+<div class="label-title">お電話番号</div>
 <input id="phone">
 </div>
 
-<div class="item">メールアドレス<input id="mail"></div>
+<div class="item">
+<div class="label-title">メールアドレス</div>
+<input id="mail">
+</div>
 
-<div class="item">お申込内容
+<div class="item">
+<div class="label-title">お申込内容</div>
 <select id="plan">
 <option>ネットのみ</option>
 <option>ネット・新番</option>
@@ -39,7 +97,8 @@ button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:1
 </select>
 </div>
 
-<div class="item">現状回線
+<div class="item">
+<div class="label-title">現状回線</div>
 <select id="line">
 <option>ドコモ光</option>
 <option>ソフトバンク光</option>
@@ -60,7 +119,8 @@ button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:1
 <input id="otherLine" placeholder="その他の場合入力">
 </div>
 
-<div class="item">家の種類
+<div class="item">
+<div class="label-title">家の種類</div>
 <select id="house">
 <option>持家</option>
 <option>戸建賃貸</option>
@@ -68,8 +128,8 @@ button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:1
 </select>
 </div>
 
-<!-- ★ここ変更 -->
-<div class="item">アンテナの有無
+<div class="item">
+<div class="label-title">アンテナの有無</div>
 <select id="antenna" onchange="toggleCampaign();">
 <option>有</option>
 <option>無</option>
@@ -77,8 +137,8 @@ button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:1
 </select>
 </div>
 
-<!-- ★キャンペーン -->
-<div class="item">キャンペーン
+<div class="item">
+<div class="label-title">キャンペーン</div>
 <select id="campaign" onchange="toggleAntenna(); toggleOther();">
 <option>6万円</option>
 <option id="c1">6万円（アンテナ）</option>
@@ -92,7 +152,9 @@ button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:1
 </div>
 
 <div id="antennaArea" class="hidden">
-<div class="item">アンテナ種類
+
+<div class="item">
+<div class="label-title">アンテナ種類</div>
 <select id="antennaType">
 <option>オフホワイト</option>
 <option>ライトブラウン</option>
@@ -102,49 +164,58 @@ button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:1
 </select>
 </div>
 
-<div class="item">アンテナ業者連絡日
+<div class="item">
+<div class="label-title">アンテナ業者連絡日</div>
 <input id="antennaDate">
 </div>
+
 </div>
 
-<!-- 以下そのまま -->
+<div class="item">
+<div class="label-title">オプション（複数可）</div>
 
-<div class="item">オプション（複数可）<br>
-<label><input type="checkbox" value="440">ナンバーディスプレイ</label><br>
-<label><input type="checkbox" value="1210">基本放送プラン</label><br>
-<label><input type="checkbox" value="3300">専門チャンネルプラン</label><br>
-<label><input type="checkbox" value="550">NUROさくっとサポート</label><br>
-<label><input type="checkbox" value="550">NURO光safe</label><br>
-<label><input type="checkbox" value="550">ソネットくらしの相談</label><br>
-<label><input type="checkbox" value="550">キキホショ＋</label><br>
-<label><input type="checkbox" value="660">ネットスーパー</label><br>
-<label><input type="checkbox" value="2189">U-NEXT</label>
+<label><input type="checkbox" value="440"> ナンバーディスプレイ</label>
+<label><input type="checkbox" value="1210"> 基本放送プラン</label>
+<label><input type="checkbox" value="3300"> 専門チャンネルプラン</label>
+<label><input type="checkbox" value="550"> NUROさくっとサポート</label>
+<label><input type="checkbox" value="550"> NURO光safe</label>
+<label><input type="checkbox" value="550"> ソネットくらしの相談</label>
+<label><input type="checkbox" value="550"> キキホショ＋</label>
+<label><input type="checkbox" value="660"> ネットスーパー</label>
+<label><input type="checkbox" value="2189"> U-NEXT</label>
+
 </div>
 
-<div class="item">オプション解約
+<div class="item">
+<div class="label-title">オプション解約</div>
 <select id="cancel">
 <option>無</option>
 <option>2ヶ月で解約</option>
 </select>
 </div>
 
-<div class="item">その他（複数選択可）<br>
-<label><input type="checkbox" name="otherCheck" value="70歳以上">70歳以上</label><br>
+<div class="item">
+<div class="label-title">その他（複数選択可）</div>
+<label><input type="checkbox" name="otherCheck" value="70歳以上"> 70歳以上</label>
+
 <label id="twoMonthOption" class="hidden">
-<input type="checkbox" name="otherCheck" value="2カ月無料">2カ月無料
+<input type="checkbox" name="otherCheck" value="2カ月無料"> 2カ月無料
 </label>
 </div>
 
-<div class="item">工事日
+<div class="item">
+<div class="label-title">工事日</div>
 <input id="date1" placeholder="第一希望">
 <input id="date2" placeholder="第二希望">
 </div>
 
-<div class="item">確電のご希望日時
+<div class="item">
+<div class="label-title">確電のご希望日時</div>
 <input id="confirmDate">
 </div>
 
-<div class="item">特記事項
+<div class="item">
+<div class="label-title">特記事項</div>
 <textarea id="note"></textarea>
 </div>
 
@@ -157,14 +228,11 @@ button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:1
 
 <script>
 
-// ★ここが新ロジック
 function toggleCampaign(){
 let antenna = document.getElementById("antenna").value;
-
 let c1 = document.getElementById("c1");
 let c2 = document.getElementById("c2");
 
-// 有なら非表示
 if(antenna === "有"){
   c1.style.display = "none";
   c2.style.display = "none";
@@ -174,7 +242,6 @@ if(antenna === "有"){
 }
 }
 
-// 既存
 function toggleAntenna(){
 let campaign = document.getElementById("campaign").value;
 document.getElementById("antennaArea").style.display =
@@ -194,9 +261,85 @@ window.onload = function(){
 toggleAntenna();
 toggleOther();
 toggleCampaign();
+};
+
+function generate(){
+
+let name = document.getElementById('name').value;
+let phone = document.getElementById('phone').value;
+let mail = document.getElementById('mail').value;
+let plan = document.getElementById('plan').value;
+let cancel = document.getElementById('cancel').value;
+let line = document.getElementById('line').value;
+let house = document.getElementById('house').value;
+let antenna = document.getElementById('antenna').value;
+let otherLine = document.getElementById('otherLine').value;
+let campaign = document.getElementById('campaign').value;
+
+if(line === "その他" && otherLine){ line = otherLine; }
+
+let net = (campaign === "1万円" || campaign === "無（マンション）") ? 3850 : 5500;
+let phoneCost = (plan !== "ネットのみ") ? 550 : 0;
+
+let options = document.querySelectorAll('input[type="checkbox"]:checked');
+let optionTotal = 0;
+let optionNames = [];
+
+options.forEach(o=>{
+  if(o.name !== "otherCheck"){
+    optionTotal += parseInt(o.value);
+    optionNames.push(o.parentNode.textContent.trim());
+  }
+});
+
+let otherChecks = document.querySelectorAll('input[name="otherCheck"]:checked');
+let otherNames = [];
+otherChecks.forEach(o=>{
+  otherNames.push(o.value);
+});
+
+let total = net + phoneCost + optionTotal;
+
+let antennaText = "";
+if(campaign.includes("アンテナ")){
+  let antennaType = document.getElementById('antennaType').value;
+  let antennaDate = document.getElementById('antennaDate').value;
+  antennaText =
+`アンテナ種類：${antennaType}
+アンテナ連絡日：${antennaDate}
+`;
 }
 
-// generateはそのままでOK（省略）
+let date1 = document.getElementById('date1').value;
+let date2 = document.getElementById('date2').value;
+let confirmDate = document.getElementById('confirmDate').value;
+let note = document.getElementById('note').value;
+
+let text =
+`お名前：${name}様
+お電話番号：${phone}
+メール：${mail}
+お申込内容：${plan}
+現状回線：${line}
+家の種類：${house}
+アンテナの有無：${antenna}
+キャンペーン：${campaign}
+${antennaText}オプション：${optionNames.join("・") || "無"}
+オプション解約：${cancel}
+その他：${otherNames.join("・") || "無"}
+工事日：第一希望 ${date1} / 第二希望 ${date2}
+確電希望：${confirmDate}
+特記事項：${note}
+合計金額：${total}円`;
+
+document.getElementById("result").textContent = text;
+}
+
+function copyText(){
+let text = document.getElementById("result").textContent;
+navigator.clipboard.writeText(text);
+alert("コピーしました");
+}
 
 </script>
 
