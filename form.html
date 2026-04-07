@@ -21,9 +21,8 @@ button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:1
 
 <h2>申込フォーム</h2>
 
-<!-- ★ひらがな限定 -->
 <div class="item">お名前（ひらがな）
-<input id="name" oninput="checkHiragana(this)" placeholder="ひらがなで入力">
+<input id="name" oninput="checkHiragana(this)">
 </div>
 
 <div class="item">お電話番号<input id="phone"></div>
@@ -86,7 +85,7 @@ button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:1
 </select>
 </div>
 
-<!-- アンテナ条件表示 -->
+<!-- アンテナ -->
 <div id="antennaArea" class="hidden">
 
 <div class="item">アンテナ種類
@@ -124,11 +123,15 @@ button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:1
 </select>
 </div>
 
-<div class="item">その他
-<select id="other">
-<option>無</option>
-<option>70歳以上</option>
-</select>
+<!-- ★ここが変更ポイント -->
+<div class="item">その他（複数選択可）<br>
+
+<label><input type="checkbox" name="otherCheck" value="70歳以上">70歳以上</label><br>
+
+<label id="twoMonthOption" class="hidden">
+<input type="checkbox" name="otherCheck" value="2カ月無料">2カ月無料
+</label>
+
 </div>
 
 <div class="item">工事日
@@ -161,22 +164,18 @@ function checkHiragana(el){
 // アンテナ表示
 function toggleAntenna(){
 let campaign = document.getElementById("campaign").value;
-let area = document.getElementById("antennaArea");
-area.style.display = campaign.includes("アンテナ") ? "block" : "none";
+document.getElementById("antennaArea").style.display =
+campaign.includes("アンテナ") ? "block" : "none";
 }
 
 // その他制御
 function toggleOther(){
 let campaign = document.getElementById("campaign").value;
-let other = document.getElementById("other");
+let two = document.getElementById("twoMonthOption");
 
 let allowed = ["6万円","6万円（アンテナ）","7万円","7万円（アンテナ）","4万円"];
 
-other.innerHTML = '<option>無</option><option>70歳以上</option>';
-
-if(allowed.includes(campaign)){
-  other.innerHTML += '<option>2カ月無料</option>';
-}
+two.style.display = allowed.includes(campaign) ? "block" : "none";
 }
 
 // 生成
@@ -196,15 +195,26 @@ if(line === "その他" && otherLine){ line = otherLine; }
 let net = (campaign === "1万円" || campaign === "無（マンション）") ? 3850 : 5500;
 let phoneCost = (plan !== "ネットのみ") ? 550 : 0;
 
+// オプション
 let options = document.querySelectorAll('input[type="checkbox"]:checked');
 let optionTotal = 0;
 let optionNames = [];
 
 options.forEach(o=>{
-  optionTotal += parseInt(o.value);
-  optionNames.push(o.parentNode.textContent.trim());
+  if(o.name !== "otherCheck"){
+    optionTotal += parseInt(o.value);
+    optionNames.push(o.parentNode.textContent.trim());
+  }
 });
 
+// その他
+let otherChecks = document.querySelectorAll('input[name="otherCheck"]:checked');
+let otherNames = [];
+otherChecks.forEach(o=>{
+  otherNames.push(o.value);
+});
+
+// 合計
 let total = net + phoneCost + optionTotal;
 
 // アンテナ
@@ -216,7 +226,7 @@ antennaText = `アンテナ種類：${antennaType}
 アンテナ連絡日：${antennaDate}`;
 }
 
-let other = document.getElementById('other').value;
+// 日程
 let date1 = document.getElementById('date1').value;
 let date2 = document.getElementById('date2').value;
 let confirmDate = document.getElementById('confirmDate').value;
@@ -232,7 +242,7 @@ let text =
 キャンペーン：${campaign}
 ${antennaText}
 オプション：${optionNames.join("・") || "無"}
-その他：${other}
+その他：${otherNames.join("・") || "無"}
 工事日：第一希望 ${date1} / 第二希望 ${date2}
 確電希望：${confirmDate}
 特記事項：${note}
