@@ -212,13 +212,15 @@ otherChecks.forEach(o=>{
 
 let total = net + phoneCost + optionTotal;
 
-// ★ここが改行修正ポイント
+// ★改行完全制御
 let antennaText = "";
 if(campaign.includes("アンテナ")){
-let antennaType = document.getElementById('antennaType').value;
-let antennaDate = document.getElementById('antennaDate').value;
-antennaText = `\nアンテナ種類：${antennaType}
-アンテナ連絡日：${antennaDate}`;
+  let antennaType = document.getElementById('antennaType').value;
+  let antennaDate = document.getElementById('antennaDate').value;
+  antennaText =
+`アンテナ種類：${antennaType}
+アンテナ連絡日：${antennaDate}
+`;
 }
 
 let date1 = document.getElementById('date1').value;
@@ -226,6 +228,7 @@ let date2 = document.getElementById('date2').value;
 let confirmDate = document.getElementById('confirmDate').value;
 let note = document.getElementById('note').value;
 
+// ★ここが最重要（改行を完全制御）
 let text =
 `お名前：${name}様
 お電話番号：${phone}
@@ -234,8 +237,8 @@ let text =
 現状回線：${line}
 家の種類：${house}
 アンテナの有無：${antenna}
-キャンペーン：${campaign}${antennaText}
-オプション：${optionNames.join("・") || "無"}
+キャンペーン：${campaign}
+${antennaText}オプション：${optionNames.join("・") || "無"}
 オプション解約：${cancel}
 その他：${otherNames.join("・") || "無"}
 工事日：第一希望 ${date1} / 第二希望 ${date2}
