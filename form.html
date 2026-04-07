@@ -21,11 +21,15 @@ button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:1
 
 <h2>申込フォーム</h2>
 
-<div class="item">お名前<input id="name" pattern="[ぁ-んー\s]+" title="ひらがなで入力してください"></div>
-<div class="item">電話番号<input id="phone"></div>
+<!-- ★ひらがな限定 -->
+<div class="item">お名前（ひらがな）
+<input id="name" oninput="checkHiragana(this)" placeholder="ひらがなで入力">
+</div>
+
+<div class="item">お電話番号<input id="phone"></div>
 <div class="item">メールアドレス<input id="mail"></div>
 
-<div class="item">申込内容
+<div class="item">お申込内容
 <select id="plan">
 <option>ネットのみ</option>
 <option>ネット・新番</option>
@@ -148,6 +152,12 @@ button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:1
 </div>
 
 <script>
+
+// ひらがな制御
+function checkHiragana(el){
+  el.value = el.value.replace(/[^ぁ-んー\s]/g, '');
+}
+
 // アンテナ表示
 function toggleAntenna(){
 let campaign = document.getElementById("campaign").value;
@@ -155,7 +165,7 @@ let area = document.getElementById("antennaArea");
 area.style.display = campaign.includes("アンテナ") ? "block" : "none";
 }
 
-// その他条件制御
+// その他制御
 function toggleOther(){
 let campaign = document.getElementById("campaign").value;
 let other = document.getElementById("other");
@@ -182,7 +192,7 @@ let campaign = document.getElementById('campaign').value;
 
 if(line === "その他" && otherLine){ line = otherLine; }
 
-// 金額計算
+// 金額
 let net = (campaign === "1万円" || campaign === "無（マンション）") ? 3850 : 5500;
 let phoneCost = (plan !== "ネットのみ") ? 550 : 0;
 
@@ -206,10 +216,7 @@ antennaText = `アンテナ種類：${antennaType}
 アンテナ連絡日：${antennaDate}`;
 }
 
-// その他
 let other = document.getElementById('other').value;
-
-// 日程
 let date1 = document.getElementById('date1').value;
 let date2 = document.getElementById('date2').value;
 let confirmDate = document.getElementById('confirmDate').value;
@@ -218,9 +225,9 @@ let note = document.getElementById('note').value;
 // 出力
 let text =
 `お名前：${name}様
-電話番号：${phone}
+お電話番号：${phone}
 メール：${mail}
-申込内容：${plan}
+お申込内容：${plan}
 現状回線：${line}
 キャンペーン：${campaign}
 ${antennaText}
@@ -240,6 +247,7 @@ let text = document.getElementById("result").textContent;
 navigator.clipboard.writeText(text);
 alert("コピーしました");
 }
+
 </script>
 
 </body>
