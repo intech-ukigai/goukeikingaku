@@ -21,11 +21,15 @@ button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:1
 
 <h2>申込フォーム</h2>
 
-<div class="item">お名前（ひらがな）
-<input id="name" oninput="checkHiragana(this, event)">
+<div class="item">お名前
+<input id="name" placeholder="ひらがなで入力してください">
 </div>
 
-<div class="item">お電話番号<input id="phone"></div>
+<!-- ★ここに自動整形追加 -->
+<div class="item">お電話番号
+<input id="phone" oninput="formatPhone(this)">
+</div>
+
 <div class="item">メールアドレス<input id="mail"></div>
 
 <div class="item">お申込内容
@@ -85,7 +89,6 @@ button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:1
 </select>
 </div>
 
-<!-- アンテナ -->
 <div id="antennaArea" class="hidden">
 
 <div class="item">アンテナ種類
@@ -123,15 +126,12 @@ button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:1
 </select>
 </div>
 
-<!-- ★ここが変更ポイント -->
 <div class="item">その他（複数選択可）<br>
-
 <label><input type="checkbox" name="otherCheck" value="70歳以上">70歳以上</label><br>
 
 <label id="twoMonthOption" class="hidden">
 <input type="checkbox" name="otherCheck" value="2カ月無料">2カ月無料
 </label>
-
 </div>
 
 <div class="item">工事日
@@ -156,19 +156,24 @@ button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:1
 
 <script>
 
-// ひらがな制御
-function checkHiragana(el){
-  el.value = el.value.replace(/[^ぁ-んー\s]/g, '');
+// ★電話番号自動ハイフン
+function formatPhone(el){
+  let num = el.value.replace(/\D/g,''); // 数字だけ
+  if(num.length <= 3){
+    el.value = num;
+  }else if(num.length <= 7){
+    el.value = num.slice(0,3) + '-' + num.slice(3);
+  }else{
+    el.value = num.slice(0,3) + '-' + num.slice(3,7) + '-' + num.slice(7,11);
+  }
 }
 
-// アンテナ表示
 function toggleAntenna(){
 let campaign = document.getElementById("campaign").value;
 document.getElementById("antennaArea").style.display =
 campaign.includes("アンテナ") ? "block" : "none";
 }
 
-// その他制御
 function toggleOther(){
 let campaign = document.getElementById("campaign").value;
 let two = document.getElementById("twoMonthOption");
@@ -178,24 +183,22 @@ let allowed = ["6万円","6万円（アンテナ）","7万円","7万円（アン
 two.style.display = allowed.includes(campaign) ? "block" : "none";
 }
 
-// 生成
 function generate(){
 
 let name = document.getElementById('name').value;
 let phone = document.getElementById('phone').value;
 let mail = document.getElementById('mail').value;
 let plan = document.getElementById('plan').value;
+let cancel = document.getElementById('cancel').value;
 let line = document.getElementById('line').value;
 let otherLine = document.getElementById('otherLine').value;
 let campaign = document.getElementById('campaign').value;
 
 if(line === "その他" && otherLine){ line = otherLine; }
 
-// 金額
 let net = (campaign === "1万円" || campaign === "無（マンション）") ? 3850 : 5500;
 let phoneCost = (plan !== "ネットのみ") ? 550 : 0;
 
-// オプション
 let options = document.querySelectorAll('input[type="checkbox"]:checked');
 let optionTotal = 0;
 let optionNames = [];
@@ -207,17 +210,14 @@ options.forEach(o=>{
   }
 });
 
-// その他
 let otherChecks = document.querySelectorAll('input[name="otherCheck"]:checked');
 let otherNames = [];
 otherChecks.forEach(o=>{
   otherNames.push(o.value);
 });
 
-// 合計
 let total = net + phoneCost + optionTotal;
 
-// アンテナ
 let antennaText = "";
 if(campaign.includes("アンテナ")){
 let antennaType = document.getElementById('antennaType').value;
@@ -226,13 +226,11 @@ antennaText = `アンテナ種類：${antennaType}
 アンテナ連絡日：${antennaDate}`;
 }
 
-// 日程
 let date1 = document.getElementById('date1').value;
 let date2 = document.getElementById('date2').value;
 let confirmDate = document.getElementById('confirmDate').value;
 let note = document.getElementById('note').value;
 
-// 出力
 let text =
 `お名前：${name}様
 お電話番号：${phone}
@@ -242,6 +240,7 @@ let text =
 キャンペーン：${campaign}
 ${antennaText}
 オプション：${optionNames.join("・") || "無"}
+オプション解約：${cancel}
 その他：${otherNames.join("・") || "無"}
 工事日：第一希望 ${date1} / 第二希望 ${date2}
 確電希望：${confirmDate}
@@ -251,7 +250,6 @@ ${antennaText}
 document.getElementById("result").textContent = text;
 }
 
-// コピー
 function copyText(){
 let text = document.getElementById("result").textContent;
 navigator.clipboard.writeText(text);
