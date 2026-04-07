@@ -3,18 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>申込フォーム</title>
+<title>NUROお申込フォーム</title>
 
 <style>
 body {
   font-family:sans-serif;
   background:#f5f5f5;
-  padding:20px;
+  margin:0;
+}
+
+.header {
+  background:#000;
+  color:#fff;
+  padding:14px 20px;
+  font-size:20px;
+  font-weight:bold;
+  width:100%;
+  box-sizing:border-box;
 }
 
 .container {
   max-width:500px;
-  margin:auto;
+  margin:20px auto;
+  padding:0 10px;
 }
 
 .item {
@@ -33,7 +44,7 @@ body {
   font-size:14px;
 }
 
-/* ★ここ重要（チェックボックス対策） */
+/* 入力系 */
 input[type="text"],
 input[type="email"],
 select,
@@ -43,6 +54,7 @@ textarea {
   margin-top:5px;
 }
 
+/* チェックボックス対策 */
 input[type="checkbox"] {
   width:auto;
   margin-right:6px;
@@ -78,9 +90,10 @@ button {
 </head>
 
 <body>
-<div class="container">
 
-<h2>申込フォーム</h2>
+<div class="header">NUROお申込フォーム</div>
+
+<div class="container">
 
 <div class="item">
 <div class="label-title">お名前</div>
@@ -130,7 +143,7 @@ button {
 
 <div class="item">
 <div class="label-title">家の種類</div>
-<select id="house">
+<select id="house" onchange="toggleCampaign();">
 <option>持家</option>
 <option>戸建賃貸</option>
 <option>マンション</option>
@@ -154,9 +167,9 @@ button {
 <option>7万円</option>
 <option id="c2">7万円（アンテナ）</option>
 <option>4万円</option>
-<option>1万円</option>
+<option id="c3">1万円</option>
 <option>無（one）</option>
-<option>無（マンション）</option>
+<option id="c4">無（マンション）</option>
 </select>
 </div>
 
@@ -241,15 +254,29 @@ button {
 
 function toggleCampaign(){
 let antenna = document.getElementById("antenna").value;
+let house = document.getElementById("house").value;
+
 let c1 = document.getElementById("c1");
 let c2 = document.getElementById("c2");
+let c3 = document.getElementById("c3");
+let c4 = document.getElementById("c4");
 
+// アンテナ条件
 if(antenna === "有"){
   c1.style.display = "none";
   c2.style.display = "none";
 }else{
   c1.style.display = "block";
   c2.style.display = "block";
+}
+
+// 家条件
+if(house === "持家" || house === "戸建賃貸"){
+  c3.style.display = "none";
+  c4.style.display = "none";
+}else{
+  c3.style.display = "block";
+  c4.style.display = "block";
 }
 }
 
