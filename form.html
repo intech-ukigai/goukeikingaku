@@ -212,11 +212,12 @@ otherChecks.forEach(o=>{
 
 let total = net + phoneCost + optionTotal;
 
+// ★ここが改行修正ポイント
 let antennaText = "";
 if(campaign.includes("アンテナ")){
 let antennaType = document.getElementById('antennaType').value;
 let antennaDate = document.getElementById('antennaDate').value;
-antennaText = `アンテナ種類：${antennaType}
+antennaText = `\nアンテナ種類：${antennaType}
 アンテナ連絡日：${antennaDate}`;
 }
 
@@ -233,8 +234,7 @@ let text =
 現状回線：${line}
 家の種類：${house}
 アンテナの有無：${antenna}
-キャンペーン：${campaign}
-${antennaText}
+キャンペーン：${campaign}${antennaText}
 オプション：${optionNames.join("・") || "無"}
 オプション解約：${cancel}
 その他：${otherNames.join("・") || "無"}
