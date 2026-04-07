@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NURO申込フォーム</title>
+<title>申込フォーム</title>
 
 <style>
 body {
@@ -33,10 +33,19 @@ body {
   font-size:14px;
 }
 
-input, select, textarea {
+/* ★ここ重要（チェックボックス対策） */
+input[type="text"],
+input[type="email"],
+select,
+textarea {
   width:100%;
   padding:8px;
   margin-top:5px;
+}
+
+input[type="checkbox"] {
+  width:auto;
+  margin-right:6px;
 }
 
 label {
@@ -174,15 +183,15 @@ button {
 <div class="item">
 <div class="label-title">オプション（複数可）</div>
 
-<label><input type="checkbox" value="440"> ナンバーディスプレイ</label>
-<label><input type="checkbox" value="1210"> 基本放送プラン</label>
-<label><input type="checkbox" value="3300"> 専門チャンネルプラン</label>
-<label><input type="checkbox" value="550"> NUROさくっとサポート</label>
-<label><input type="checkbox" value="550"> NURO光safe</label>
-<label><input type="checkbox" value="550"> ソネットくらしの相談</label>
-<label><input type="checkbox" value="550"> キキホショ＋</label>
-<label><input type="checkbox" value="660"> ネットスーパー</label>
-<label><input type="checkbox" value="2189"> U-NEXT</label>
+<label><input type="checkbox" value="440">ナンバーディスプレイ</label>
+<label><input type="checkbox" value="1210">基本放送プラン</label>
+<label><input type="checkbox" value="3300">専門チャンネルプラン</label>
+<label><input type="checkbox" value="550">NUROさくっとサポート</label>
+<label><input type="checkbox" value="550">NURO光safe</label>
+<label><input type="checkbox" value="550">ソネットくらしの相談</label>
+<label><input type="checkbox" value="550">キキホショ＋</label>
+<label><input type="checkbox" value="660">ネットスーパー</label>
+<label><input type="checkbox" value="2189">U-NEXT</label>
 
 </div>
 
@@ -196,11 +205,13 @@ button {
 
 <div class="item">
 <div class="label-title">その他（複数選択可）</div>
-<label><input type="checkbox" name="otherCheck" value="70歳以上"> 70歳以上</label>
+
+<label><input type="checkbox" name="otherCheck" value="70歳以上">70歳以上</label>
 
 <label id="twoMonthOption" class="hidden">
-<input type="checkbox" name="otherCheck" value="2カ月無料"> 2カ月無料
+<input type="checkbox" name="otherCheck" value="2カ月無料">2カ月無料
 </label>
+
 </div>
 
 <div class="item">
