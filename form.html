@@ -21,15 +21,12 @@ button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:1
 
 <h2>申込フォーム</h2>
 
+<!-- ★制限なしに変更 -->
 <div class="item">お名前
 <input id="name" placeholder="ひらがなで入力してください">
 </div>
 
-<!-- ★ここに自動整形追加 -->
-<div class="item">お電話番号
-<input id="phone" oninput="formatPhone(this)">
-</div>
-
+<div class="item">お電話番号<input id="phone"></div>
 <div class="item">メールアドレス<input id="mail"></div>
 
 <div class="item">お申込内容
@@ -155,18 +152,6 @@ button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:1
 </div>
 
 <script>
-
-// ★電話番号自動ハイフン
-function formatPhone(el){
-  let num = el.value.replace(/\D/g,''); // 数字だけ
-  if(num.length <= 3){
-    el.value = num;
-  }else if(num.length <= 7){
-    el.value = num.slice(0,3) + '-' + num.slice(3);
-  }else{
-    el.value = num.slice(0,3) + '-' + num.slice(3,7) + '-' + num.slice(7,11);
-  }
-}
 
 function toggleAntenna(){
 let campaign = document.getElementById("campaign").value;
