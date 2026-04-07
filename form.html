@@ -170,6 +170,11 @@ let allowed = ["6万円","6万円（アンテナ）","7万円","7万円（アン
 two.style.display = allowed.includes(campaign) ? "block" : "none";
 }
 
+window.onload = function(){
+toggleAntenna();
+toggleOther();
+};
+
 function generate(){
 
 let name = document.getElementById('name').value;
