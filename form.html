@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>申込フォーム</title>
+
+<style>
+body { font-family: sans-serif; background:#f5f5f5; padding:20px;}
+.container { max-width:500px; margin:auto;}
+.item { background:#fff; padding:12px; margin-bottom:10px; border-radius:10px;}
+input, select { width:100%; padding:8px; margin-top:5px;}
+button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:10px; background:#4CAF50; color:white;}
+#result { white-space: pre-wrap; background:#fff; padding:10px; margin-top:10px; border-radius:10px;}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h2>申込フォーム</h2>
+
+<div class="item">お名前<input id="name"></div>
+<div class="item">電話番号<input id="phone"></div>
+
+<div class="item">申込内容
+<select id="plan">
+<option>ネットのみ</option>
+<option>ネット・新番</option>
+<option>ネット・ポーター</option>
+</select>
+</div>
+
+<div class="item">現状回線
+<select id="line">
+<option>ドコモ光</option>
+<option>ソフトバンク光</option>
+<option>AU光</option>
+<option>エアー</option>
+<option>5G</option>
+<option>フレッツ</option>
+<option>OCN光</option>
+<option>ビッグローブ光</option>
+<option>ソネット光</option>
+<option>J-COM</option>
+<option>t-com光</option>
+<option>nifty光</option>
+<option>U-next光</option>
+<option>未利用</option>
+<option>その他</option>
+</select>
+<input id="otherLine" placeholder="その他の場合入力">
+</div>
+
+<div class="item">家の種類
+<select id="house">
+<option>持家</option>
+<option>戸建賃貸</option>
+<option>マンション</option>
+</select>
+</div>
+
+<div class="item">アンテナ
+<select id="antenna">
+<option>有</option>
+<option>無</option>
+</select>
+</div>
+
+<div class="item">キャンペーン
+<select id="campaign">
+<option>6万円</option>
+<option>6万円（設定）</option>
+<option>6万円（アンテナ）</option>
+<option>7万円</option>
+<option>7万円（アンテナ）</option>
+<option>4万円</option>
+<option>1万円</option>
+<option>無（one）</option>
+<option>無（マンション）</option>
+</select>
+</div>
+
+<div class="item">オプション（複数可）<br>
+<label><input type="checkbox" value="440">ナンバーディスプレイ</label><br>
+<label><input type="checkbox" value="1210">基本放送</label><br>
+<label><input type="checkbox" value="3300">専門チャンネル</label><br>
+<label><input type="checkbox" value="550">さくっとサポート</label><br>
+<label><input type="checkbox" value="550">光safe</label><br>
+<label><input type="checkbox" value="550">くらし相談</label><br>
+<label><input type="checkbox" value="550">キキホショ</label><br>
+<label><input type="checkbox" value="660">ネットスーパー</label><br>
+<label><input type="checkbox" value="2189">U-NEXT</label>
+</div>
+
+<div class="item">オプション解約
+<select id="cancel">
+<option>無</option>
+<option>2ヶ月で解約</option>
+</select>
+</div>
+
+<div class="item">その他
+<select id="other">
+<option>無</option>
+<option>70歳以上</option>
+<option>2カ月無料</option>
+</select>
+</div>
+
+<div class="item">工事日
+<input id="date1" placeholder="第一希望">
+<input id="date2" placeholder="第二希望">
+</div>
+
+<button onclick="generate()">生成</button>
+<button onclick="copyText()">コピー</button>
+
+<div id="result"></div>
+
+</div>
+
+<script>
+function generate(){
+
+let name = document.getElementById('name').value;
+let phone = document.getElementById('phone').value;
+let plan = document.getElementById('plan').value;
+let line = document.getElementById('line').value;
+let otherLine = document.getElementById('otherLine').value;
+let campaign = document.getElementById('campaign').value;
+
+if(line === "その他" && otherLine){
+  line = otherLine;
+}
+
+// ネット料金
+let net = (campaign === "1万円" || campaign === "無（マンション）") ? 3850 : 5500;
+
+// 光電話
+let phoneCost = (plan !== "ネットのみ") ? 550 : 0;
+
+// オプション合計
+let options = document.querySelectorAll('input[type="checkbox"]:checked');
+let optionTotal = 0;
+let optionNames = [];
+
+options.forEach(o=>{
+  optionTotal += parseInt(o.value);
+  optionNames.push(o.parentNode.textContent.trim());
+});
+
+let total = net + phoneCost + optionTotal;
+
+let text = 
+`お名前：${name}様
+お電話番号：${phone}
+お申込内容：${plan}
+現状の回線：${line}
+キャンペーン：${campaign}
+オプション：${optionNames.join("・") || "無"}
+合計金額：${total}円`;
+
+document.getElementById("result").textContent = text;
+}
+
+function copyText(){
+let text = document.getElementById("result").textContent;
+navigator.clipboard.writeText(text);
+alert("コピーしました");
+}
+</script>
+
+</body>
+</html>
