@@ -152,7 +152,7 @@ button {
 
 <script>
 
-// 候補日10個自動生成
+// 候補日生成
 let datesDiv = document.getElementById("dates");
 for(let i=0;i<10;i++){
   let div = document.createElement("div");
@@ -167,7 +167,7 @@ for(let i=0;i<10;i++){
   datesDiv.appendChild(div);
 }
 
-// 表示切替
+// 切替
 function switchForm(){
 let type = document.getElementById("type").value;
 
@@ -178,7 +178,7 @@ document.getElementById("consultArea").style.display =
 (type === "工事日のご相談") ? "block" : "none";
 }
 
-// 日付フォーマット
+// 日付整形
 function formatDate(dateStr){
 let d = new Date(dateStr);
 let m = d.getMonth() + 1;
@@ -222,7 +222,6 @@ NURO光のお申込みを担当いたしました${staff}でございます。
 ${line1}
 ${line2}
 
-上記日程にてご都合いかがでしょうか。
 もしご都合が合わない場合は、別日程での調整も可能でございますので、お気軽にお申し付けください。
 
 お手数をおかけいたしますが、ご確認のほどよろしくお願いいたします。
