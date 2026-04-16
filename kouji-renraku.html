@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工事日のご連絡</title>
+
+<style>
+body { font-family:sans-serif; background:#f5f5f5; margin:0; }
+
+.header {
+  background:#000;
+  color:#fff;
+  padding:14px 20px;
+  font-size:20px;
+  font-weight:bold;
+}
+
+.container {
+  max-width:500px;
+  margin:20px auto;
+  padding:0 10px;
+}
+
+.item {
+  background:#fff;
+  padding:12px;
+  margin-bottom:12px;
+  border-radius:10px;
+}
+
+.label-title {
+  background:#222;
+  color:#fff;
+  padding:6px 10px;
+  border-radius:6px;
+  margin-bottom:6px;
+}
+
+input, select {
+  width:100%;
+  padding:8px;
+  margin-top:5px;
+}
+
+.row {
+  display:flex;
+  gap:8px;
+}
+
+.row input { flex:2; }
+.row select { flex:1; }
+
+button {
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:10px;
+  background:#4CAF50;
+  color:white;
+}
+
+#result {
+  white-space: pre-wrap;
+  background:#fff;
+  padding:10px;
+  margin-top:10px;
+  border-radius:10px;
+}
+
+.hidden { display:none; }
+</style>
+</head>
+
+<body>
+
+<div class="header">工事日のご連絡</div>
+
+<div class="container">
+
+<div class="item">
+<div class="label-title">メール種類</div>
+<select id="type" onchange="switchForm()">
+<option>工事日変更</option>
+<option>工事日のご相談</option>
+</select>
+</div>
+
+<div class="item">
+<div class="label-title">担当者</div>
+<select id="staff">
+<option>波多江</option>
+<option>竹井</option>
+<option>浮貝</option>
+</select>
+</div>
+
+<div class="item">
+<div class="label-title">お名前</div>
+<input id="name">
+</div>
+
+<div class="item">
+<div class="label-title">当初ご希望日</div>
+<input id="original">
+</div>
+
+<!-- 工事日変更 -->
+<div id="changeArea">
+
+<div class="item">
+<div class="label-title">第一希望</div>
+<div class="row">
+<input type="date" id="cDate1">
+<select id="cTime1">
+<option>午前</option>
+<option>午後</option>
+</select>
+</div>
+</div>
+
+<div class="item">
+<div class="label-title">第二希望</div>
+<div class="row">
+<input type="date" id="cDate2">
+<select id="cTime2">
+<option>午前</option>
+<option>午後</option>
+</select>
+</div>
+</div>
+
+</div>
+
+<!-- 工事日のご相談 -->
+<div id="consultArea" class="hidden">
+
+<div class="item">
+<div class="label-title">候補日（最大10）</div>
+<div id="dates"></div>
+</div>
+
+</div>
+
+<button onclick="generate()">生成</button>
+<button onclick="copyText()">コピー</button>
+
+<div id="result"></div>
+
+</div>
+
+<script>
+
+// 候補日10個自動生成
+let datesDiv = document.getElementById("dates");
+for(let i=0;i<10;i++){
+  let div = document.createElement("div");
+  div.className = "row";
+  div.innerHTML = `
+    <input type="date" class="date">
+    <select class="time">
+      <option>午前</option>
+      <option>午後</option>
+      <option>午前or午後</option>
+    </select>`;
+  datesDiv.appendChild(div);
+}
+
+// 表示切替
+function switchForm(){
+let type = document.getElementById("type").value;
+
+document.getElementById("changeArea").style.display =
+(type === "工事日変更") ? "block" : "none";
+
+document.getElementById("consultArea").style.display =
+(type === "工事日のご相談") ? "block" : "none";
+}
+
+// 日付フォーマット
+function formatDate(dateStr){
+let d = new Date(dateStr);
+let m = d.getMonth() + 1;
+let day = d.getDate();
+let week = ["日","月","火","水","木","金","土"][d.getDay()];
+return m + "月" + day + "日（" + week + "）";
+}
+
+// 生成
+function generate(){
+
+let type = document.getElementById("type").value;
+let staff = document.getElementById("staff").value;
+let name = document.getElementById("name").value;
+let original = document.getElementById("original").value;
+
+let text = "";
+
+if(type === "工事日変更"){
+
+let d1 = document.getElementById("cDate1").value;
+let t1 = document.getElementById("cTime1").value;
+let d2 = document.getElementById("cDate2").value;
+let t2 = document.getElementById("cTime2").value;
+
+let line1 = d1 ? `・第一希望：${formatDate(d1)} ${t1}` : "";
+let line2 = d2 ? `・第二希望：${formatDate(d2)} ${t2}` : "";
+
+text =
+`件名：工事日変更のご連絡
+
+${name}様
+
+NURO光のお申込みを担当いたしました${staff}でございます。
+この度はNURO光oneへのお申込みをいただき、誠にありがとうございます。
+
+早速ではございますが、工事日程につきましてご連絡です。
+ご希望いただいておりました【${original}】ですが、現在予約が大変混み合っており、すでに満枠となっておりました。
+
+そのため、誠に勝手ながら下記日程にて予約を変更させていただいております。
+${line1}
+${line2}
+
+上記日程にてご都合いかがでしょうか。
+もしご都合が合わない場合は、別日程での調整も可能でございますので、お気軽にお申し付けください。
+
+お手数をおかけいたしますが、ご確認のほどよろしくお願いいたします。
+何かご不明点等ございましたら、お気軽にご連絡くださいませ。
+引き続きどうぞよろしくお願いいたします。`;
+
+}
+
+if(type === "工事日のご相談"){
+
+let dates = document.querySelectorAll(".date");
+let times = document.querySelectorAll(".time");
+
+let list = "";
+let count = 1;
+
+for(let i=0;i<dates.length;i++){
+  if(dates[i].value){
+    list += `${count}：${formatDate(dates[i].value)} ${times[i].value}\n`;
+    count++;
+  }
+}
+
+text =
+`件名：工事日のご相談
+
+${name}様
+
+NURO光のお申込みを担当いたしました${staff}でございます。
+この度はNURO光oneへのお申込みをいただき、誠にありがとうございます。
+
+早速ではございますが、工事日程につきましてご連絡です。
+ご希望いただいておりました【${original}】ですが、現在予約が大変混み合っており、すでに満枠となっておりました。
+
+そのため、下記日程より第三希望までご選択の上、ご返信の程お願い申し上げます。
+
+${list}
+上記が【今現在の工事の空き状況】でございます。
+タイミングによっては満枠となる可能性がございますことご了承くださいませ。
+
+もしご都合が合わない場合は、別日程での調整も可能でございますので、お気軽にお申し付けください。
+
+お手数をおかけいたしますが、ご確認のほどよろしくお願いいたします。
+何かご不明点等ございましたら、お気軽にご連絡くださいませ。
+引き続きどうぞよろしくお願いいたします。`;
+
+}
+
+document.getElementById("result").textContent = text;
+}
+
+// コピー
+function copyText(){
+let text = document.getElementById("result").textContent;
+navigator.clipboard.writeText(text);
+alert("コピーしました");
+}
+
+</script>
+
+</body>
+</html>
