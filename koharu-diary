@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>虹春の10年日記</title>
+
+<style>
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: #fffaf5;
+  color: #333;
+  max-width: 500px;
+  margin: auto;
+  padding: 20px;
+}
+
+h1 { font-size: 20px; }
+
+.card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  margin-top: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+button {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 10px;
+  background: #d4a373;
+  color: white;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+textarea {
+  width: 100%;
+  margin-top: 10px;
+  height: 100px;
+}
+
+.hidden { display: none; }
+
+img { margin-top: 10px; border-radius: 10px; }
+
+/* 🎂 誕生日画面 */
+#birthdayScreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #fffaf5;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div id="birthdayScreen">
+  <h1>🎂 お誕生日おめでとう 🎂</h1>
+  <p id="birthdayMessage"></p>
+  <button onclick="enterApp()">開く</button>
+</div>
+
+<h1 id="title"></h1>
+
+<!-- 📖 日記 -->
+<div class="card">
+  <h2>📖 今日の日記</h2>
+  <textarea id="diaryText"></textarea>
+  <input type="file" id="imageInput">
+  <button onclick="saveDiary()">保存</button>
+</div>
+
+<!-- 💌 手紙 -->
+<div class="card">
+  <h2>💌 未来のあなたへ</h2>
+  <textarea id="futureText"></textarea>
+  <button onclick="saveFuture()">手紙を保存</button>
+</div>
+
+<!-- 📚 記録 -->
+<div class="card">
+  <h2>📚 記録</h2>
+  <button onclick="toggleList()">表示 / 非表示</button>
+  <div id="list" class="hidden"></div>
+</div>
+
+<script>
+// ===== 基本設定 =====
+const BIRTHDAY = "2020-03-24";
+
+// ===== 年齢 =====
+function getAge() {
+  const today = new Date();
+  const birth = new Date(BIRTHDAY);
+
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+}
+
+// ===== 呼び方 =====
+function getName() {
+  const age = getAge();
+  if (age <= 5) return "こはちゃん";
+  if (age <= 15) return "虹春ちゃん";
+  return "虹春";
+}
+
+// ===== タイトル反映 =====
+function setTitle() {
+  const name = getName();
+  const age = getAge();
+
+  document.getElementById("title").innerText =
+    name + "へ（" + age + "歳）";
+
+  document.getElementById("futureText").placeholder =
+    name + "へ、未来のあなたへ";
+
+  document.getElementById("diaryText").placeholder =
+    "今日の" + name + "とのことを書こう";
+}
+
+// ===== 誕生日判定 =====
+function isBirthday() {
+  const today = new Date();
+  const birth = new Date(BIRTHDAY);
+
+  return (
+    today.getMonth() === birth.getMonth() &&
+    today.getDate() === birth.getDate()
+  );
+}
+
+// ===== 誕生日演出 =====
+function checkBirthday() {
+  if (isBirthday()) {
+    const name = getName();
+    const age = getAge();
+
+    document.getElementById("birthdayScreen").style.display = "flex";
+    document.getElementById("birthdayMessage").innerText =
+      name + "、" + age + "歳のお誕生日おめでとう🎉";
+
+    document.body.style.background = "#faedcd";
+  }
+}
+
+function enterApp() {
+  document.getElementById("birthdayScreen").style.display = "none";
+}
+
+// ===== 日記保存 =====
+async function saveDiary() {
+  const text = document.getElementById("diaryText").value;
+  const file = document.getElementById("imageInput").files[0];
+
+  let imageUrl = "";
+  if (file) imageUrl = await toBase64(file);
+
+  const data = JSON.parse(localStorage.getItem("diary") || "[]");
+
+  data.push({
+    date: new Date().toISOString(),
+    text,
+    imageUrl
+  });
+
+  localStorage.setItem("diary", JSON.stringify(data));
+  alert(getName() + "に、ちゃんと届くように預かったよ📮");
+}
+
+// ===== 手紙保存 =====
+function saveFuture() {
+  const text = document.getElementById("futureText").value;
+
+  const unlock = new Date();
+  unlock.setFullYear(unlock.getFullYear() + 18);
+
+  const data = JSON.parse(localStorage.getItem("future") || "[]");
+
+  data.push({
+    message: text,
+    name: getName(),
+    created: new Date().toISOString(),
+    unlockDate: unlock.toISOString()
+  });
+
+  localStorage.setItem("future", JSON.stringify(data));
+  alert(getName() + "の未来に、そっと預けたよ🔒");
+}
+
+// ===== 表示 =====
+function toggleList() {
+  const el = document.getElementById("list");
+  el.classList.toggle("hidden");
+
+  if (!el.classList.contains("hidden")) loadData();
+}
+
+function loadData() {
+  const diary = JSON.parse(localStorage.getItem("diary") || "[]");
+  const future = JSON.parse(localStorage.getItem("future") || "[]");
+
+  const today = new Date();
+
+  let html = "<h3>📖 日記</h3>";
+
+  diary.forEach(d => {
+    html += `
+      <div class="card">
+        <b>${new Date(d.date).toLocaleDateString()}</b><br>
+        ${d.text}<br>
+        ${d.imageUrl ? `<img src="${d.imageUrl}" width="100%">` : ""}
+      </div>
+    `;
+  });
+
+  html += "<h3>💌 未来の手紙</h3>";
+
+  future.forEach(f => {
+    const unlock = new Date(f.unlockDate);
+
+    if (today >= unlock) {
+      html += `<div class="card">💌 ${f.message}</div>`;
+    } else {
+      html += `<div class="card">🔒 まだ開けられないよ</div>`;
+    }
+  });
+
+  document.getElementById("list").innerHTML = html;
+}
+
+// ===== 画像変換 =====
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
+}
+
+// ===== 初期化 =====
+setTitle();
+checkBirthday();
+</script>
+
+</body>
+</html>
