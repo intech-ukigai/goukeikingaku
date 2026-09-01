@@ -215,9 +215,12 @@ function formatDate(value){
 }
 
 function collectFormData(){
-  let line = document.getElementById('line').value;
+  const rawLine = document.getElementById('line').value;
+  let line = rawLine;
   const otherLine = document.getElementById('otherLine').value.trim();
   if (line === 'その他' && otherLine) line = otherLine;
+  if (rawLine === 'エアー') line = 'ソフトバンクエアー';
+  if (rawLine === '5G') line = 'ドコモ５Gルーター';
 
   const productName = product.value;
   const netCost = Number(product.selectedOptions[0].dataset.price);
@@ -229,7 +232,7 @@ function collectFormData(){
   const otherNames = Array.from(document.querySelectorAll('input[name="otherCheck"]:checked')).map(option => option.value);
   const total = netCost + phoneCost + optionTotal;
 
-  return { line, productName, netCost, plan, phoneCost, selectedOptions, optionTotal, optionNames, otherNames, total };
+  return { rawLine, line, productName, netCost, plan, phoneCost, selectedOptions, optionTotal, optionNames, otherNames, total };
 }
 
 function generate(){
@@ -366,30 +369,31 @@ NURO 光は最短ご利用期間3年間の自動更新のご契約で、契約�
 
 function getCampaignTalk(value, line, staff){
   const initialFee = `また、お申し込みにあたりまして契約事務手数料6,050円が発生いたしますが、今回キャンペーンで初月のインターネット料金が無料となっております。（開通後の2か月目の末に初請求が来るタイミング）（工事の際に現金の受け渡しは一切行っておりませんのでご安心ください、アンテナ設置は除く）`;
-  if (value === '6万円') return `また（${line}）をご解約の際に、ご利用期間によっては違約金が発生する可能性がございますが、今回キャンペーンで6万円のキャッシュバックを付与させていただいておりますので、ご認識のほどよろしくお願いいたします。
+  const cancellationLead = getCancellationLead(line);
+  if (value === '6万円') return `${cancellationLead}今回キャンペーンで6万円のキャッシュバックを付与させていただいておりますので、ご認識のほどよろしくお願いいたします。
 
 こちらのキャッシュバックにつきましては、お申し込みから12か月以内でのご利用の開始、ご利用開始月から5か月後の末日までにお支払い方法、メールアドレスのご登録、キャッシュバックをお受け取りいただくまでのご利用が必要となりますので、ご注意をお願いいたします。
 
 また、お受け取りの流れといたしましては、開通月を1か月目として6か月後に3万円、12か月後に3万円をNUROマイページからお受け取り手続きが可能となりますので、それぞれ45日以内にお手続きをよろしくお願いいたします。
 
 ${initialFee}`;
-  if (value === '4万円') return `また（${line}）をご解約の際に、ご利用期間によっては違約金が発生する可能性がございますが、今回キャンペーンで4万円のキャッシュバックを付与させていただいておりますので、ご認識のほどよろしくお願いいたします。
+  if (value === '4万円') return `${cancellationLead}今回キャンペーンで4万円のキャッシュバックを付与させていただいておりますので、ご認識のほどよろしくお願いいたします。
 
 こちらのキャッシュバックにつきましては、お申し込みから12か月以内でのご利用の開始、ご利用開始月から5か月後の末日までにお支払い方法、メールアドレスのご登録、キャッシュバックをお受け取りいただくまでのご利用が必要となりますので、ご注意をお願いいたします。
 
 また、お受け取りの流れといたしましては、開通月を1か月目として6か月後に2万円、12か月後に2万円をNUROマイページからお受け取り手続きが可能となりますので、それぞれ45日以内にお手続きをよろしくお願いいたします。
 
 ${initialFee}`;
-  if (value === '2万円') return `また（${line}）をご解約の際に、ご利用期間によっては違約金が発生する可能性がございますが、今回キャンペーンで2万円のキャッシュバックを付与させていただいておりますので、ご認識のほどよろしくお願いいたします。
+  if (value === '2万円') return `${cancellationLead}今回キャンペーンで2万円のキャッシュバックを付与させていただいておりますので、ご認識のほどよろしくお願いいたします。
 
 こちらのキャッシュバックにつきましては、お申し込みから12か月以内でのご利用の開始、ご利用開始月から5か月後の末日までにお支払い方法、メールアドレスのご登録、キャッシュバックをお受け取りいただくまでのご利用が必要となりますので、ご注意をお願いいたします。
 
 また、お受け取りの流れといたしましては、開通月を1か月目として6か月後に2万円をNUROマイページからお受け取り手続きが可能となりますので、45日以内にお手続きをよろしくお願いいたします。
 
 ${initialFee}`;
-  if (value === '7万円' || value === '7万円（アンテナ）') return `また、（${line}）をご解約の際にご利用期間によっては違約金が発生する可能性がございますが、今回キャンペーンで違約金、および工事費の残債、アンテナ設置費用を最大7万円までのご返金と、5,000円のキャッシュバックを付与させていただいておりますので、ご認識のほどよろしくお願いいたします。
+  if (value === '7万円' || value === '7万円（アンテナ）') return `${cancellationLead}今回キャンペーンで違約金、および工事費の残債、アンテナ設置費用を最大7万円までのご返金と、5,000円のキャッシュバックを付与させていただいておりますので、ご認識のほどよろしくお願いいたします。
 キャッシュバックのお受け取り方法につきましては、（${staff}）がお渡ししておりますキャッシュバックのご案内をご確認お願いいたします。`;
-  if (value === '1万円') return `また、（${line}）をご解約の際にご利用期間によっては違約金が発生する可能性がございますが、今回キャンペーンで1万円のキャッシュバックをつけさせていただいておりますので、ご認識のほどよろしくお願いいたします。
+  if (value === '1万円') return `${cancellationLead}今回キャンペーンで1万円のキャッシュバックをつけさせていただいておりますので、ご認識のほどよろしくお願いいたします。
 
 またこちらのキャッシュバックにつきましては、お申し込みから12か月以内でのご利用の開始、ご利用開始月から7か月目の末日までにお支払い方法とメールアドレスのご登録、キャッシュバックをお受け取りいただくまでのご利用が必要となりますので、よろしくお願いいたします。
 
@@ -397,6 +401,13 @@ ${initialFee}`;
 
 ${initialFee}`;
   return initialFee;
+}
+
+function getCancellationLead(line){
+  if (line === 'ソフトバンクエアー' || line === 'ドコモ５Gルーター') {
+    return `また（${line}）をご解約の際に、違約金はございませんが、ご利用期間によっては端末の残債費用がある場合がございますが、`;
+  }
+  return `また（${line}）をご解約の際に、ご利用期間によっては違約金が発生する可能性がございますが、`;
 }
 
 function getOptionDescriptions(optionNames){
