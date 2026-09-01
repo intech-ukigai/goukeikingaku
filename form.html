@@ -39,6 +39,14 @@ button:hover { background:#409544; }
 <div class="header">NUROお申込フォーム</div>
 <div class="container">
 
+<div class="item">
+  <div class="label-title">担当者</div>
+  <select id="staff">
+    <option>波多江</option>
+    <option>竹井</option>
+  </select>
+</div>
+
 <div class="item"><div class="label-title">お名前</div><input id="name" type="text" placeholder="ひらがなで入力してください"></div>
 <div class="item"><div class="label-title">お電話番号</div><input id="phone" type="tel"></div>
 <div class="item"><div class="label-title">メールアドレス</div><input id="mail" type="email"></div>
@@ -231,7 +239,8 @@ function generate(){
   const date1Text = date1 ? `${date1} ${document.getElementById('time1').value}` : '';
   const date2Text = date2 ? `${date2} ${document.getElementById('time2').value}` : '';
 
-  const text = `お名前：${document.getElementById('name').value}様
+  const text = `担当者：${document.getElementById('staff').value}
+お名前：${document.getElementById('name').value}様
 お電話番号：${document.getElementById('phone').value}
 メール：${document.getElementById('mail').value}
 商品名：${productName}
