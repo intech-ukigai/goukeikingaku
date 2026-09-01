@@ -30,7 +30,8 @@ label { display:block; margin-bottom:7px; line-height:1.45; }
 .note { color:#666; font-size:12px; margin:5px 0 10px; }
 button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:10px; background:#4CAF50; color:white; font-size:16px; cursor:pointer; }
 button:hover { background:#409544; }
-#result { white-space:pre-wrap; background:#fff; padding:10px; margin-top:10px; border-radius:10px; overflow-wrap:anywhere; }
+#result, #talkResult { white-space:pre-wrap; background:#fff; padding:10px; margin-top:10px; border-radius:10px; overflow-wrap:anywhere; line-height:1.65; }
+.result-title { margin:24px 0 6px; font-size:18px; text-align:center; }
 .hidden { display:none; }
 </style>
 </head>
@@ -81,9 +82,7 @@ button:hover { background:#409544; }
 
 <div class="item">
   <div class="label-title">キャンペーン</div>
-  <select id="campaign">
-    <option>6万円</option><option id="c1">6万円（アンテナ）</option><option>7万円</option><option id="c2">7万円（アンテナ）</option><option>4万円</option><option>2万円</option><option id="c3">1万円</option><option>無（one）</option><option id="c4">無（マンション）</option>
-  </select>
+  <select id="campaign"></select>
 </div>
 
 <div id="antennaArea" class="hidden">
@@ -113,7 +112,7 @@ button:hover { background:#409544; }
   <label><input type="checkbox" value="2189" data-option-name="U-NEXT for NURO">U-NEXT for NURO</label>
 </div>
 
-<div class="item"><div class="label-title">オプション解約</div><select id="cancel"><option>無</option><option>2ヶ月で解約</option></select></div>
+<div class="item"><div class="label-title">オプション解約</div><select id="cancel"><option>無</option><option>有</option></select></div>
 
 <div class="item">
   <div class="label-title">お支払い方法</div>
@@ -142,30 +141,33 @@ button:hover { background:#409544; }
 <div class="item"><div class="label-title">特記事項</div><textarea id="note"></textarea></div>
 
 <button type="button" id="generateButton">生成</button>
+<h2 class="result-title">お申込内容</h2>
 <button type="button" id="copyButton">コピー</button>
 <div id="result"></div>
+
+<h2 class="result-title">トークスクリプト</h2>
+<div id="talkResult"></div>
 </div>
 
 <script>
 const campaign = document.getElementById('campaign');
 const antenna = document.getElementById('antenna');
 const house = document.getElementById('house');
+const product = document.getElementById('product');
 
-function toggleCampaign(){
-  const antennaValue = antenna.value;
-  const houseValue = house.value;
-  const c1 = document.getElementById('c1');
-  const c2 = document.getElementById('c2');
-  const c3 = document.getElementById('c3');
-  const c4 = document.getElementById('c4');
-
-  c1.hidden = antennaValue === '有';
-  c2.hidden = antennaValue === '有';
-  if (antennaValue === '有' && (campaign.value === '6万円（アンテナ）' || campaign.value === '7万円（アンテナ）')) campaign.value = '6万円';
-
-  c3.hidden = houseValue !== 'マンション';
-  c4.hidden = houseValue !== 'マンション';
-  if (houseValue !== 'マンション' && (campaign.value === '1万円' || campaign.value === '無（マンション）')) campaign.value = '6万円';
+function updateCampaignOptions(){
+  const previous = campaign.value;
+  let choices;
+  if (product.value === 'NURO光（M）') {
+    choices = ['1万円', '無（マンション）'];
+  } else {
+    choices = ['6万円', '7万円'];
+    if (antenna.value !== '有') choices.push('7万円（アンテナ）');
+    choices.push('4万円', '2万円', '無');
+  }
+  campaign.innerHTML = '';
+  choices.forEach(choice => campaign.add(new Option(choice, choice)));
+  if (choices.includes(previous)) campaign.value = previous;
   toggleAntenna();
 }
 
@@ -201,10 +203,10 @@ document.querySelectorAll('input[data-required-by]').forEach(tuner => {
   });
 });
 
-antenna.addEventListener('change', toggleCampaign);
-house.addEventListener('change', toggleCampaign);
+antenna.addEventListener('change', updateCampaignOptions);
+product.addEventListener('change', updateCampaignOptions);
 campaign.addEventListener('change', toggleAntenna);
-toggleCampaign();
+updateCampaignOptions();
 
 function formatDate(value){
   if (!value) return '';
@@ -212,22 +214,26 @@ function formatDate(value){
   return `${year}/${Number(month)}/${Number(day)}`;
 }
 
-function generate(){
+function collectFormData(){
   let line = document.getElementById('line').value;
   const otherLine = document.getElementById('otherLine').value.trim();
   if (line === 'その他' && otherLine) line = otherLine;
 
-  const productSelect = document.getElementById('product');
-  const productName = productSelect.value;
-  const netCost = Number(productSelect.selectedOptions[0].dataset.price);
+  const productName = product.value;
+  const netCost = Number(product.selectedOptions[0].dataset.price);
   const plan = document.getElementById('plan').value;
   const phoneCost = (plan === 'ネット・新番' || plan === 'ネット・ポーター') ? 550 : 0;
-
   const selectedOptions = Array.from(document.querySelectorAll('#options input[type="checkbox"]:checked'));
   const optionTotal = selectedOptions.reduce((sum, option) => sum + Number(option.value), 0);
   const optionNames = selectedOptions.map(option => option.dataset.optionName);
   const otherNames = Array.from(document.querySelectorAll('input[name="otherCheck"]:checked')).map(option => option.value);
   const total = netCost + phoneCost + optionTotal;
+
+  return { line, productName, netCost, plan, phoneCost, selectedOptions, optionTotal, optionNames, otherNames, total };
+}
+
+function generate(){
+  const data = collectFormData();
 
   let antennaText = '';
   if (campaign.value.includes('アンテナ')) {
@@ -243,23 +249,167 @@ function generate(){
 お名前：${document.getElementById('name').value}様
 お電話番号：${document.getElementById('phone').value}
 メール：${document.getElementById('mail').value}
-商品名：${productName}
-お申込内容：${plan}
-現状回線：${line}
+商品名：${data.productName}
+お申込内容：${data.plan}
+現状回線：${data.line}
 家の種類：${house.value}
 アンテナの有無：${antenna.value}
 キャンペーン：${campaign.value}
-${antennaText}オプション：${optionNames.join('・') || '無'}
+${antennaText}オプション：${data.optionNames.join('・') || '無'}
 オプション解約：${document.getElementById('cancel').value}
 お支払い方法：${document.getElementById('payment').value}
-その他：${otherNames.join('・') || '無'}
+その他：${data.otherNames.join('・') || '無'}
 工事日：第一希望 ${date1Text} / 第二希望 ${date2Text}
 確電希望：${document.getElementById('confirmDate').value}
 特記事項：${document.getElementById('note').value}
-合計金額：${total.toLocaleString('ja-JP')}円`;
+合計金額：${data.total.toLocaleString('ja-JP')}円`;
 
   document.getElementById('result').textContent = text;
+  document.getElementById('talkResult').textContent = buildTalkScript(data);
   if (typeof gtag === 'function') gtag('event', 'form_generate');
+}
+
+function buildTalkScript(data){
+  const name = document.getElementById('name').value;
+  const staff = document.getElementById('staff').value;
+  const isM = data.productName === 'NURO光（M）';
+
+  const intro = `お忙しいところ失礼いたします。
+私、NURO光 正規販売代理店 株式会社インテックの浮貝と申します。
+お電話口はご契約者様、ご本人様の（${name}）様でお間違いないでしょうか。
+
+本日は弊社担当の（${staff}）がお伺いをいたしまして、お預かりいたします光回線のインターネットサービス NURO 光へのお申し込みについての確認のお電話となりますが、お時間少々よろしいでしょうか。
+－はい
+ありがとうございます。
+それでは（${staff}）がお渡しいたしました資料をご参考いただきながら、必要がございましたらメモのご記入をお願いいたします。${isM ? '\n（必要があればでOK）' : ''}
+
+まず冒頭に今回お申し込みをいただく NURO 光につきましては、決して強制的な変更ですとか、地域全体での変更、機器交換ではございませんので、現状お使いの（${data.line}）からソニーネットワークコミュニケーションズが提供する NURO 光への任意でのお乗り換えのご提案ということは担当より伺っておりますでしょうか。
+また、株式会社インテックの（${staff}）という自己紹介はございましたでしょうか。
+－はい
+ありがとうございます。
+つきましては、今回お乗り換えになりますので、NURO 光開通後に現在ご利用中の（${data.line}）にはご解約のご連絡をお願いいたします。${isM ? '' : '（ご本人様確認が入るのでお客様ご自身で解約していただく必要がございます）'}
+こちらのお手続きを忘れてしまいますと、NURO 光の月額料金と重複してご請求が来てしまいますので、ご注意をお願いいたします。`;
+
+  const campaignTalk = getCampaignTalk(campaign.value, data.line, staff);
+  const contractTalk = isM
+    ? `そうしましたら、ご契約内容のご確認になります。
+NURO 光は55,000円の工事費を36か月の分割で、1か月目に1,555円、2か月目から36か月目に1,527円が発生いたしますが、インターネット料金4,730円から同額の割引を適用いたしますので、毎月相殺となります。
+
+続きまして NURO 光をご解約の際の費用についてご案内いたします。
+NURO 光は最短ご利用期間3年間の自動更新のご契約で、契約更新月以外にご解約をされた場合2,653円の違約金と、ご利用最終月は日割り計算ではなく1か月分4,730円が発生いたします。
+工事費用に関しましても、相殺しきれなかった残債分があった際には、残債分を一括でのご請求となりますのでご注意をお願いいたします。
+また NURO 光は初期契約解除制度がございますが、こちらは入会証到着から8日以内であれば、キャンセル料無しでキャンセルすることが可能となります。
+続きまして、工事につきましてはお客様お立会いの下、宅内工事がございます。
+宅内工事の際には、光キャビネットと呼ばれるものを外壁に設置いたします。`
+    : `そうしましたら、ご契約内容のご確認になります。
+NURO 光は55,000円の工事費を36か月の分割で、1か月目に1,555円、2か月目から36か月目に1,527円が発生いたしますが、インターネット料金5,720円から同額の割引を適用いたしますので、毎月相殺となります。
+
+続きまして NURO 光をご解約の際の費用についてご案内いたします。
+NURO 光は最短ご利用期間3年間の自動更新のご契約で、契約更新月以外にご解約をされた場合3,643円の違約金と、ご利用最終月は日割り計算ではなく1か月分5,720円が発生いたします。
+工事費用に関しましても、相殺しきれなかった残債分があった際には、残債分を一括でのご請求となりますのでご注意をお願いいたします。
+また NURO 光は初期契約解除制度がございますが、こちらは入会証到着から8日以内であれば、キャンセル料無しでキャンセルすることが可能となります。
+続きまして、工事につきましてはお客様お立会いの下、宅内工事と屋外工事の2回ございます。（工事完了の署名が必要ですので、お立合いをお願いいたします）
+宅内工事の際には、光キャビネットと呼ばれるものを外壁に設置いたします。
+（土日祝は別途追加工事費3,850円が発生いたします）`;
+
+  const priceItems = [`インターネット${data.netCost.toLocaleString('ja-JP')}円`];
+  if (data.phoneCost) priceItems.push('NURO 光電話基本料金550円');
+  data.selectedOptions.forEach(option => {
+    const spokenName = option.dataset.optionName === 'ナンバーディスプレイ' ? '番号表示サービス' : option.dataset.optionName;
+    priceItems.push(`${spokenName}${Number(option.value).toLocaleString('ja-JP')}円`);
+  });
+  const priceTalk = `また、今回のお申し込みは${joinJapanese(priceItems)}、合計${data.total.toLocaleString('ja-JP')}円でお間違いないでしょうか。`;
+
+  const tvNotes = [];
+  if (data.optionNames.some(name => name.includes('基本放送') || name.includes('基本プラン'))) tvNotes.push('基本放送プランは、地デジとBSが視聴可能です。');
+  if (data.optionNames.some(name => name.includes('専門チャンネルプラン'))) tvNotes.push('専門チャンネルプランは、地デジとBSとCSチャンネルが視聴可能です。');
+
+  const optionTalk = getOptionDescriptions(data.optionNames);
+  const cancelTalk = document.getElementById('cancel').value === '有'
+    ? `今回つけさせていただいたオプションに関しては、開通月と翌月が無料となっており、開通月翌月に私からオプション解約のご案内の連絡を入れさせていただきます。
+もしよろしければ、現在お電話させていただいております、こちらの電話番号をご登録いただけると幸いです。`
+    : '';
+
+  const tvQuestion = data.plan === 'ネット・ポーター'
+    ? 'ご利用中の固定電話のお電話番号を2つお持ちですとか、テレビを光でご覧になっているということはございませんでしょうか。'
+    : `テレビを光でご覧になっているということはございませんでしょうか。
+（ケーブルでご覧になっている場合→テレビは引き続き現在のサービスでご視聴なさいますでしょうか？）`;
+
+  const phoneTalk = data.phoneCost
+    ? `お電話につきましては NURO 光1回線に対して1番号のみとなっております。
+また光電話お申し込みにあたり、最初だけ回線工事費3,300円、番号表示の電話付加サービス工事につきましても、最初だけ1,100円発生いたしますのでご了承をお願いいたします。`
+    : '';
+
+  const ageTalk = data.otherNames.includes('70歳以上')
+    ? `また、こちらの確認のお電話はご家族様へのご連絡は必要でしょうか。
+はいの場合：ご家族様のお名前、お電話番号、関係性、いつ架電してよいかご都合を伺う。`
+    : '';
+
+  const ending = `今回お申し込みいただきますNURO光は、最大実測値2,500メガのベストエフォート型のサービスでございますので、あらかじめご承知のほどお願いいたします。
+
+ここまでで何かご不明な点等はございませんでしょうか。
+今後ご不明な点などございましたら、弊社電話番号03-4595-0221へご連絡をお願いいたします。
+弊社、木曜日・金曜日が定休日、それ以外は10:00～18:00が営業時間となっておりますので、よろしくお願いいたします。
+
+最後に本サービスの契約条件は、ソニーネットワークコミュニケーションズのホームページにも掲載しております。開通後のお問い合わせ、ご解約などの連絡先は、ソニーネットワークコミュニケーションズ、お電話番号0570-099-118（0120-87-8685）となりますので、よろしくお願いいたします。
+
+それではこちらでお申し込みの受付となり、確認のお電話が終了となりますが、よろしいでしょうか。
+本日はお忙しい中、貴重なお時間をいただき誠にありがとうございました。
+それでは失礼いたします。`;
+
+  return [intro, campaignTalk, contractTalk, tvNotes.join('\n'), priceTalk, optionTalk, cancelTalk, tvQuestion, phoneTalk, ageTalk, ending].filter(Boolean).join('\n\n');
+}
+
+function getCampaignTalk(value, line, staff){
+  const initialFee = `また、お申し込みにあたりまして契約事務手数料6,050円が発生いたしますが、今回キャンペーンで初月のインターネット料金が無料となっております。（開通後の2か月目の末に初請求が来るタイミング）（工事の際に現金の受け渡しは一切行っておりませんのでご安心ください、アンテナ設置は除く）`;
+  if (value === '6万円') return `また（${line}）をご解約の際に、ご利用期間によっては違約金が発生する可能性がございますが、今回キャンペーンで6万円のキャッシュバックを付与させていただいておりますので、ご認識のほどよろしくお願いいたします。
+
+こちらのキャッシュバックにつきましては、お申し込みから12か月以内でのご利用の開始、ご利用開始月から5か月後の末日までにお支払い方法、メールアドレスのご登録、キャッシュバックをお受け取りいただくまでのご利用が必要となりますので、ご注意をお願いいたします。
+
+また、お受け取りの流れといたしましては、開通月を1か月目として6か月後に3万円、12か月後に3万円をNUROマイページからお受け取り手続きが可能となりますので、それぞれ45日以内にお手続きをよろしくお願いいたします。
+
+${initialFee}`;
+  if (value === '4万円') return `また（${line}）をご解約の際に、ご利用期間によっては違約金が発生する可能性がございますが、今回キャンペーンで4万円のキャッシュバックを付与させていただいておりますので、ご認識のほどよろしくお願いいたします。
+
+こちらのキャッシュバックにつきましては、お申し込みから12か月以内でのご利用の開始、ご利用開始月から5か月後の末日までにお支払い方法、メールアドレスのご登録、キャッシュバックをお受け取りいただくまでのご利用が必要となりますので、ご注意をお願いいたします。
+
+また、お受け取りの流れといたしましては、開通月を1か月目として6か月後に2万円、12か月後に2万円をNUROマイページからお受け取り手続きが可能となりますので、それぞれ45日以内にお手続きをよろしくお願いいたします。
+
+${initialFee}`;
+  if (value === '2万円') return `また（${line}）をご解約の際に、ご利用期間によっては違約金が発生する可能性がございますが、今回キャンペーンで2万円のキャッシュバックを付与させていただいておりますので、ご認識のほどよろしくお願いいたします。
+
+こちらのキャッシュバックにつきましては、お申し込みから12か月以内でのご利用の開始、ご利用開始月から5か月後の末日までにお支払い方法、メールアドレスのご登録、キャッシュバックをお受け取りいただくまでのご利用が必要となりますので、ご注意をお願いいたします。
+
+また、お受け取りの流れといたしましては、開通月を1か月目として6か月後に2万円をNUROマイページからお受け取り手続きが可能となりますので、45日以内にお手続きをよろしくお願いいたします。
+
+${initialFee}`;
+  if (value === '7万円' || value === '7万円（アンテナ）') return `また、（${line}）をご解約の際にご利用期間によっては違約金が発生する可能性がございますが、今回キャンペーンで違約金、および工事費の残債、アンテナ設置費用を最大7万円までのご返金と、5,000円のキャッシュバックを付与させていただいておりますので、ご認識のほどよろしくお願いいたします。
+キャッシュバックのお受け取り方法につきましては、（${staff}）がお渡ししておりますキャッシュバックのご案内をご確認お願いいたします。`;
+  if (value === '1万円') return `また、（${line}）をご解約の際にご利用期間によっては違約金が発生する可能性がございますが、今回キャンペーンで1万円のキャッシュバックをつけさせていただいておりますので、ご認識のほどよろしくお願いいたします。
+
+またこちらのキャッシュバックにつきましては、お申し込みから12か月以内でのご利用の開始、ご利用開始月から7か月目の末日までにお支払い方法とメールアドレスのご登録、キャッシュバックをお受け取りいただくまでのご利用が必要となりますので、よろしくお願いいたします。
+
+また、お受け取りの流れといたしましては、ご利用開始月を1か月目と計算し、8か月後の15日よりお受け取りが可能となりますので、NUROマイページより45日以内にお受け取りのお手続きをお願いいたします。
+
+${initialFee}`;
+  return initialFee;
+}
+
+function getOptionDescriptions(optionNames){
+  const descriptions = {
+    'NUROさくっとサポート': 'NUROさくっとサポートは、アプリから簡単相談、ネット周りのトラブルをサポートいたします。',
+    'NURO光safe': 'NURO光safeは、最大7台までのPC、スマートフォン、タブレットにセキュリティソフトのインストールが可能です。',
+    'ソネットくらしの相談': 'ソネットくらしの相談は、暮らしに関する相談ができる電話相談サービスと、ダスキンの家事代行を割引料金でご利用できるサービスです。',
+    'キキホショ＋': 'キキホショ＋は、自宅の水回り、鍵、ガラスなどの生活トラブル解決をサポートするサービスに、インターネット接続機器の水濡れ・破損など、万が一の出費のための補償をプラスしたサービスです。',
+    'とくとくネットスーパーpowered by デリキチ': 'とくとくネットスーパーpowered by デリキチは、生鮮食品から日用品、ペット用品など、さまざまな商品を豊富に取り揃えております。',
+    'U-NEXT for NURO': 'U-NEXT for NUROは、映像作品のサブスクリプションとなります。'
+  };
+  return optionNames.filter(name => descriptions[name]).map(name => descriptions[name]).join('\n');
+}
+
+function joinJapanese(items){
+  if (items.length <= 1) return items[0] || '';
+  return `${items.slice(0, -1).join('、')}と${items[items.length - 1]}`;
 }
 
 async function copyText(){
