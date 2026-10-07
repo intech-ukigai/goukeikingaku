@@ -18,7 +18,7 @@
   <style>
     * { box-sizing: border-box; }
     body { font-family: sans-serif; margin: 0; background: #f5f5f5; color: #222; }
-    .container { max-width: 500px; margin: auto; padding: 16px 16px 100px; }
+    .container { max-width: 500px; margin: auto; padding: 16px 16px 190px; }
     h1 { margin: 8px 0 20px; text-align: center; font-size: 24px; }
     .item { min-height: 54px; background: #fff; padding: 12px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; gap: 14px; }
     .item label { flex: 1; line-height: 1.45; cursor: pointer; }
@@ -27,7 +27,12 @@
     .note { margin: -2px 2px 12px; color: #666; font-size: 12px; line-height: 1.5; }
     button { width: 100%; padding: 12px; margin-top: 6px; font-size: 16px; border: none; border-radius: 8px; background: #ff6b6b; color: #fff; cursor: pointer; }
     button:hover { background: #f45555; }
-    #total { position: fixed; z-index: 10; left: 50%; bottom: 0; width: min(500px, 100%); transform: translateX(-50%); background: #222; color: #fff; padding: 18px 16px; text-align: center; font-size: 21px; font-weight: bold; border-radius: 10px 10px 0 0; box-shadow: 0 -3px 12px rgba(0,0,0,.12); }
+    #total { position: fixed; z-index: 10; left: 50%; bottom: 0; width: min(500px, 100%); transform: translateX(-50%); background: #222; color: #fff; text-align: center; font-size: 21px; font-weight: bold; border-radius: 10px 10px 0 0; overflow: hidden; box-shadow: 0 -3px 12px rgba(0,0,0,.12); }
+    #nuro-total { padding: 12px 16px 4px; }
+    #ouchi-discount { padding: 4px 16px 12px; font-size: 18px; }
+    #effective-total { padding: 14px 16px; background: #d92332; color: #fff; font-size: 24px; }
+    .item[hidden] { display: none; }
+    .item select { flex: 0 0 auto; font-size: 16px; padding: 8px; border: 1px solid #bbb; border-radius: 6px; background: #fff; }
   </style>
 </head>
 <body>
@@ -50,6 +55,7 @@
     <p class="note">※ひかりTV二台目のプランを選ぶと、二台目チューナーが自動で選択されます。</p>
 
     <div class="item"><label for="phone">NURO光でんわ（550円）</label><input id="phone" type="checkbox" value="550"></div>
+    <div class="item" id="smartphone-item" hidden><label for="smartphone-count">ソフトバンクorワイモバイル スマホ（-1,650円）</label><select id="smartphone-count" aria-label="スマホ台数"><option value="0" selected>0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></div>
     <div class="item"><label for="number-display">番号表示（440円）</label><input id="number-display" type="checkbox" value="440"></div>
     <div class="item"><label for="support">NUROさくっとサポート（550円）</label><input id="support" type="checkbox" value="550"></div>
     <div class="item"><label for="safe">NURO光safe（550円）</label><input id="safe" type="checkbox" value="550"></div>
@@ -60,11 +66,13 @@
 
     <button type="button" id="reset-button">リセット</button>
   </main>
-  <div id="total" aria-live="polite">合計: 0円</div>
+  <div id="total" aria-live="polite"><div id="nuro-total">NURO合計 0円</div><div id="ouchi-discount">おうち割 -0円</div><div id="effective-total">実質 0円</div></div>
 
   <script>
     const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"]'));
-    const totalDisplay = document.getElementById('total');
+    const phone = document.getElementById('phone');
+    const smartphoneItem = document.getElementById('smartphone-item');
+    const smartphoneCount = document.getElementById('smartphone-count');
     let calculatorUsed = false;
 
     function hasSelectedPlan(groupName) {
@@ -80,8 +88,15 @@
 
     function calculate() {
       const total = checkboxes.reduce((sum, cb) => sum + (cb.checked ? Number(cb.value) : 0), 0);
-      totalDisplay.textContent = `合計: ${total.toLocaleString('ja-JP')}円`;
+      smartphoneItem.hidden = !phone.checked;
+      if (!phone.checked) smartphoneCount.value = '0';
+      const discount = phone.checked ? Number(smartphoneCount.value) * 1650 : 0;
+      document.getElementById('nuro-total').textContent = `NURO合計 ${total.toLocaleString('ja-JP')}円`;
+      document.getElementById('ouchi-discount').textContent = `おうち割 -${discount.toLocaleString('ja-JP')}円`;
+      document.getElementById('effective-total').textContent = `実質 ${(total - discount).toLocaleString('ja-JP')}円`;
     }
+
+    smartphoneCount.addEventListener('change', calculate);
 
     checkboxes.forEach(cb => {
       cb.addEventListener('change', () => {
