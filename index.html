@@ -31,6 +31,7 @@
     #nuro-total { padding: 12px 16px 4px; }
     #ouchi-discount { padding: 4px 16px 12px; font-size: 18px; }
     #effective-total { padding: 14px 16px; background: #d92332; color: #fff; font-size: 24px; }
+    #total.single-total #nuro-total { padding: 18px 16px; }
     .item[hidden] { display: none; }
     .item select { flex: 0 0 auto; font-size: 16px; padding: 8px; border: 1px solid #bbb; border-radius: 6px; background: #fff; }
   </style>
@@ -66,7 +67,7 @@
 
     <button type="button" id="reset-button">リセット</button>
   </main>
-  <div id="total" aria-live="polite"><div id="nuro-total">NURO合計 0円</div><div id="ouchi-discount">おうち割 -0円</div><div id="effective-total">実質 0円</div></div>
+  <div id="total" class="single-total" aria-live="polite"><div id="nuro-total">合計: 0円</div><div id="ouchi-discount" hidden>おうち割 -0円</div><div id="effective-total" hidden>実質 0円</div></div>
 
   <script>
     const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"]'));
@@ -91,7 +92,11 @@
       smartphoneItem.hidden = !phone.checked;
       if (!phone.checked) smartphoneCount.value = '0';
       const discount = phone.checked ? Number(smartphoneCount.value) * 1650 : 0;
-      document.getElementById('nuro-total').textContent = `NURO合計 ${total.toLocaleString('ja-JP')}円`;
+      const hasDiscount = discount > 0;
+      document.getElementById('total').classList.toggle('single-total', !hasDiscount);
+      document.getElementById('ouchi-discount').hidden = !hasDiscount;
+      document.getElementById('effective-total').hidden = !hasDiscount;
+      document.getElementById('nuro-total').textContent = hasDiscount ? `NURO合計 ${total.toLocaleString('ja-JP')}円` : `合計: ${total.toLocaleString('ja-JP')}円`;
       document.getElementById('ouchi-discount').textContent = `おうち割 -${discount.toLocaleString('ja-JP')}円`;
       document.getElementById('effective-total').textContent = `実質 ${(total - discount).toLocaleString('ja-JP')}円`;
     }
