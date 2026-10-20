@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>確電トークスクリプト修正版</title>
+<title>NURO光お申込みフォーム</title>
 
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-C0W71C7RB2"></script>
@@ -38,7 +38,7 @@ button:hover { background:#409544; }
 </head>
 <body>
 
-<div class="header">NUROお申込フォーム</div>
+<div class="header">NURO光お申込みフォーム</div>
 <div class="container">
 
 <div class="item">
@@ -73,22 +73,22 @@ button:hover { background:#409544; }
 <div class="item">
   <div class="label-title">現状回線</div>
   <select id="line">
-    <option>ドコモ光</option><option>ソフトバンク光</option><option>AU光</option><option>エアー</option><option>5G</option><option>フレッツ</option><option>OCN光</option><option>ビッグローブ光</option><option>ソネット光</option><option>J-COM</option><option>t-com光</option><option>nifty光</option><option>U-next光</option><option>未利用</option><option>その他</option>
+    <option>ドコモ光</option><option>ソフトバンク光</option><option>AU光</option><option>エアー</option><option>5G</option><option>フレッツ</option><option>OCN光</option><option>ビッグローブ光</option><option>ソネット光</option><option>J-COM</option><option>t-com光</option><option>nifty光</option><option>U-next光</option><option>楽天ひかり</option><option>ahamo光</option><option>GMO光</option><option>未利用</option><option>その他</option>
   </select>
   <input id="otherLine" type="text" placeholder="その他の場合入力">
 </div>
 
 <div class="item"><div class="label-title">家の種類</div><select id="house"><option>持家</option><option>戸建賃貸</option><option>マンション</option></select></div>
 <div class="item"><div class="label-title">アンテナの有無</div><select id="antenna"><option>有</option><option>無</option><option>ケーブル</option></select></div>
+<div class="item hidden" id="antennaConstructionArea">
+  <div class="label-title">アンテナ工事</div>
+  <select id="antennaConstruction"><option value="なし" selected>なし</option><option value="あり">あり</option></select>
+  <div id="antennaDetailArea" class="hidden"><input id="antennaDetail" type="text" placeholder="デザインアンテナ：黒などを記入" aria-label="アンテナ工事の詳細"></div>
+</div>
 
 <div class="item">
   <div class="label-title">キャンペーン</div>
   <select id="campaign"></select>
-</div>
-
-<div id="antennaArea" class="hidden">
-  <div class="item"><div class="label-title">アンテナ種類</div><select id="antennaType"><option>オフホワイト</option><option>ライトブラウン</option><option>ブラックブラウン</option><option>ブラック</option><option>グレー</option></select></div>
-  <div class="item"><div class="label-title">アンテナ業者連絡日</div><input id="antennaDate" type="text"></div>
 </div>
 
 <div class="item" id="options">
@@ -133,9 +133,12 @@ button:hover { background:#409544; }
 </div>
 
 <div class="item">
-  <div class="label-title">工事日</div>
-  <div class="date-row"><input id="date1" type="date" aria-label="第一希望日"><select id="time1" aria-label="第一希望時間"><option>AM</option><option>PM</option></select></div>
-  <div class="date-row"><input id="date2" type="date" aria-label="第二希望日"><select id="time2" aria-label="第二希望時間"><option>AM</option><option>PM</option></select></div>
+  <div class="label-title" id="constructionDateTitle">工事日</div>
+  <div id="internetDateArea">
+    <div class="date-row"><input id="date1" type="date" aria-label="第一希望日"><select id="time1" aria-label="第一希望時間"><option>AM</option><option>PM</option></select></div>
+    <div class="date-row"><input id="date2" type="date" aria-label="第二希望日"><select id="time2" aria-label="第二希望時間"><option>AM</option><option>PM</option></select></div>
+  </div>
+  <div id="antennaContactDateArea" class="hidden"><input id="antennaDate" type="text" aria-label="アンテナ業者からの連絡日"></div>
 </div>
 
 <div class="item"><div class="label-title">確電のご希望日時</div><input id="confirmDate" type="text"></div>
@@ -158,7 +161,7 @@ const product = document.getElementById('product');
 
 function updateCampaignOptions(selectDefault = false){
   const previous = campaign.value;
-  const choices = ['違約金', '6万円', '4万円', '2万円', '1万円', '無'];
+  const choices = ['違約金（最大７万）', '6万円', '4万円', '2万円', '1万円', '無'];
   campaign.innerHTML = '';
   choices.forEach(choice => campaign.add(new Option(choice, choice)));
   if (!selectDefault && choices.includes(previous)) {
@@ -169,8 +172,18 @@ function updateCampaignOptions(selectDefault = false){
   toggleAntenna();
 }
 
+function hasAntennaConstruction(){
+  return antenna.value === '無' && document.getElementById('antennaConstruction').value === 'あり';
+}
+
 function toggleAntenna(){
-  document.getElementById('antennaArea').style.display = campaign.value.includes('アンテナ') ? 'block' : 'none';
+  const available = antenna.value === '無';
+  const active = hasAntennaConstruction();
+  document.getElementById('antennaConstructionArea').classList.toggle('hidden', !available);
+  document.getElementById('antennaDetailArea').classList.toggle('hidden', !active);
+  document.getElementById('constructionDateTitle').textContent = active ? 'アンテナ業者からの連絡日' : '工事日';
+  document.getElementById('internetDateArea').classList.toggle('hidden', active);
+  document.getElementById('antennaContactDateArea').classList.toggle('hidden', !active);
 }
 
 function hasTvPlan(group){
@@ -203,6 +216,8 @@ document.querySelectorAll('input[data-required-by]').forEach(tuner => {
 
 product.addEventListener('change', () => updateCampaignOptions(true));
 campaign.addEventListener('change', toggleAntenna);
+antenna.addEventListener('change', toggleAntenna);
+document.getElementById('antennaConstruction').addEventListener('change', toggleAntenna);
 updateCampaignOptions(true);
 
 function formatDate(value){
@@ -236,14 +251,18 @@ function generate(){
   const data = collectFormData();
 
   let antennaText = '';
-  if (campaign.value.includes('アンテナ')) {
-    antennaText = `アンテナ種類：${document.getElementById('antennaType').value}\nアンテナ連絡日：${document.getElementById('antennaDate').value}\n`;
+  if (antenna.value === '無') {
+    antennaText = `アンテナ工事：${document.getElementById('antennaConstruction').value}\n`;
+    if (hasAntennaConstruction()) antennaText += `アンテナ詳細：${document.getElementById('antennaDetail').value}\n`;
   }
 
   const date1 = formatDate(document.getElementById('date1').value);
   const date2 = formatDate(document.getElementById('date2').value);
   const date1Text = date1 ? `${date1} ${document.getElementById('time1').value}` : '';
   const date2Text = date2 ? `${date2} ${document.getElementById('time2').value}` : '';
+  const constructionDateText = hasAntennaConstruction()
+    ? `アンテナ業者からの連絡日：${document.getElementById('antennaDate').value}`
+    : `工事日：第一希望 ${date1Text} / 第二希望 ${date2Text}`;
 
   const text = `担当者：${document.getElementById('staff').value}
 お名前：${document.getElementById('name').value}様
@@ -259,7 +278,7 @@ ${antennaText}オプション：${data.optionNames.join('・') || '無'}
 オプション解約：${document.getElementById('cancel').value}
 お支払い方法：${document.getElementById('payment').value}
 その他：${data.otherNames.join('・') || '無'}
-工事日：第一希望 ${date1Text} / 第二希望 ${date2Text}
+${constructionDateText}
 確電希望：${document.getElementById('confirmDate').value}
 特記事項：${document.getElementById('note').value}
 合計金額：${data.total.toLocaleString('ja-JP')}円`;
@@ -282,6 +301,15 @@ function buildTalkScript(data){
   detailItems.push(`キャンペーン：${campaignDisplay(campaign.value)}`);
   const priceMemo = `（${detailItems.join('、')}）`;
 
+  const constructionTalk = hasAntennaConstruction()
+    ? `アンテナ工事につきましては、設置業者からのご連絡を${document.getElementById('antennaDate').value}で承っております。
+アンテナ工事完了後に、弊社からの連絡やNURO開通窓口よりショートメッセージを送付させていただきますので、インターネット工事につきましてはその際にお日にちを調整いただきますようお願いいたします。`
+    : '工事につきましては、ご希望日時で予約ができなかった場合、弊社からの連絡やNURO開通窓口よりショートメッセージを送付させていただきますので、改めて調整いただきますようお願いいたします。';
+  const optionCancelTalk = document.getElementById('cancel').value === '有'
+    ? 'オプションに関しましては二か月でご解約のお試しで承っておりますが、ご本人様でないとご解約ができないため、開通月を一か月目といたしまして、二か月目の初旬に弊社よりEメール、またはショートメッセージにてご解約のタイミングをご案内させていただきますので、ご確認の程お願いいたします。'
+    : '';
+  const handoutTalk = staff === '竹井' ? '竹井よりお渡しさせていただきます' : `${staff}よりお渡しさせていただいております`;
+
   const ageTalk = data.otherNames.includes('70歳以上')
     ? `また、こちらの確認のお電話はご家族様へのご連絡は必要でしょうか。
 （はい→ご家族様のお名前、お電話番号、関係性、いつ架電して良いかご都合を伺う。）`
@@ -296,18 +324,19 @@ function buildTalkScript(data){
 
 まず${staff}がお伺いした際にサービスのご案内が目的であることの説明、ソニーやインテックの社名、${staff}という自己紹介はございましたでしょうか。
 
-工事につきましては、ご希望日時で予約ができなかった場合、弊社からの連絡やNURO開通窓口よりショートメッセージを送付させていただきますので、改めて調整いただきますようお願いいたします。
+${constructionTalk}
 
 ${staff}より月額料金や解約時の費用、キャッシュバックについて説明はございましたでしょうか。
 ${priceMemo}
 
-${getPaymentTalk(payment)}
+${optionCancelTalk ? `${optionCancelTalk}\n\n` : ''}${getPaymentTalk(payment)}
 
 最後にサービス全般に関しての注意事項となります。
 
 今回は強制的なお申込みではなく、地域全体でのインターネットを変更するといった内容でもございません。
 
-まず、現在利用中のサービスは、提供会社がソニーネットワークコミュニケーションズへ切り替わりますので、インターネットサービスやNURO光でんわの開通が完了後に、お客様ご自身で現在ご利用中のインターネットサービスのご解約していただく必要がございます。
+現在ご利用中の${data.line}は提供会社がソニーネットワークコミュニケーションズへ切り替わりますので
+インターネットサービス${data.phoneCost ? 'やNURO光でんわ' : ''}の開通が完了後に、お客様ご自身で${data.line}をご解約していただく必要がございます。
 
 このお手続きを忘れてしまいますと、他社の月額料金と重複してしまいますのでご注意お願いします。
 
@@ -317,11 +346,11 @@ ${getPaymentTalk(payment)}
 
 本サービスの契約条件はNURO光ホームページにも掲載しております。
 
-今後ご不明な点などございましたら、お渡しさせていただいております「お問い合わせ先一覧」より弊社へご連絡くださいませ。
+今後ご不明な点などございましたら、${handoutTalk}「お問い合わせ先一覧」より弊社へご連絡くださいませ。
 
-また、開通後のお問い合わせやご解約などのお問い合わせはサポートデスクへご連絡をお願いいたします。
+また、開通後のお問い合わせやご解約などの連絡先はNUROサポートデスクとなっておりますので、ご確認の程お願いいたします。
 
-${ageTalk ? `${ageTalk}\n\n` : ''}確認事項は以上となりまして、このお電話にてお申込み完了となりますが、よろしいでしょうか。
+${ageTalk ? `${ageTalk}\n\n` : ''}${name}様、確認事項は以上となりまして、このお電話にてお申込み完了となりますが、よろしいでしょうか。
 
 本日はお忙しい中、貴重なお時間をいただき、誠にありがとうございました。
 それでは失礼いたします。`;
@@ -329,7 +358,7 @@ ${ageTalk ? `${ageTalk}\n\n` : ''}確認事項は以上となりまして、こ�
 
 function campaignDisplay(value){
   const labels = {
-    '違約金': '違約金',
+    '違約金（最大７万）': '違約金（最大７万）',
     '6万円': '6万CB',
     '4万円': '4万CB',
     '2万円': '2万CB',
@@ -354,18 +383,14 @@ ${commonEnd}`;
   if (value === 'ソフトバンク') return `お支払方法についてソフトバンクキャリア決済をご希望いただいておりますので、このお電話終了後、ケータイ電話宛にショートメッセージが届きます。
 そちらのURLよりご登録いただきますようお願いいたします。
 ${commonEnd}`;
-  if (value === 'auかんたん決済') return `お支払方法についてauキャリア決済をご希望いただいております。
-本日から1週間前後でNURO光マイページログイン用のIDとPWが記載されたはがきが届きます。
-届きましたらマイページにログインいただきご登録いただきますようお願いいたします。
-${commonEnd}`;
-  if (value === '口座引き落とし') return `お支払方法について口座振替でご希望いただいております。
-本日から1週間前後でNURO光マイページログイン用のIDとPWが記載されたはがきが届きます。
-届きましたらマイページにログインいただきご登録いただきますようお願いいたします。
-${commonEnd}`;
-  return `お支払方法について後日ご登録を希望いただいております。
-ご登録方法ですが、本日から1週間前後でNURO光マイページログイン用のIDとPWが記載されたはがきが届きます。
-届きましたらマイページにログインいただき、お支払い方法のご登録いただきますようお願いいたします。
-${commonEnd}`;
+  const registrationEnd = 'こちらのお支払方法のご登録が完了しないと特典が対象外となる可能性がございますので、ご注意くださいませ。';
+  if (value === 'auかんたん決済' || value === '口座引き落とし') {
+    const method = value === 'auかんたん決済' ? 'au決済' : '口座振替';
+    return `お支払方法につきましては、${method}をご希望いただいておりますので、本日から一週間前後でNURO光マイページ用のログインIDとPWが記載されたはがきが届きましたら、マイページにログインいただき、お支払方法をご登録いただきますようお願いいたします。
+${registrationEnd}`;
+  }
+  return `お支払方法につきましては、後日ご登録をご希望いただいておりますので、本日から一週間前後でNURO光マイページ用のログインIDとPWが記載されたはがきが届きましたら、マイページにログインいただきお支払方法をご登録いただきますようお願いいたします。
+${registrationEnd}`;
 }
 
 async function copyText(){
